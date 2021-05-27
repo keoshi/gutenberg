@@ -48,6 +48,7 @@ jobs:
         strategy:
             matrix:
                 branch: ${{ fromJson( needs.determine-branches.outputs.matrix ) }}
+                test-suite: [post-editor, site-editor]
         env:
             tests-branch: ${{ fromJson( needs.determine-branches.outputs.matrix )[ 0 ] }} # First matrix entry also serves as tests branch
         steps:
@@ -87,7 +88,11 @@ jobs:
                   ref: ${{ matrix.branch }}
                   path: environment
 
-            # TODO: Run tests
+            - name: Run ${{ matrix.test-suite }} test suite
+              run: |
+                  npm run test-performance -- packages/e2e-tests/specs/performance/${{ matrix.test-suite }}.test.js
+
+            # TODO: Evaluate test results
 
             - name: Stop the WordPress environment
               working-directory: environment
