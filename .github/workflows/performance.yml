@@ -89,6 +89,7 @@ jobs:
                   path: environment
 
             - name: Run ${{ matrix.test-suite }} test suite
+              working-directory: performance-tests
               run: |
                   npm run test-performance -- packages/e2e-tests/specs/performance/${{ matrix.test-suite }}.test.js
 
