@@ -15,7 +15,7 @@ function gutenberg_register_typography_support( $block_type ) {
 		return;
 	}
 
-	$typography_supports = _wp_array_get( $block_type->supports, array( 'typograpgy' ), false );
+	$typography_supports = _wp_array_get( $block_type->supports, array( 'typography' ), false );
 	if ( ! $typography_supports ) {
 		return;
 	}
