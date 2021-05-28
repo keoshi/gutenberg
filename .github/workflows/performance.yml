@@ -94,8 +94,15 @@ jobs:
 
             - name: Run ${{ matrix.test-suite }} test suite
               working-directory: performance-tests
-              run: |
-                  npm run test-performance -- packages/e2e-tests/specs/performance/${{ matrix.test-suite }}.test.js
+              uses: actions/github-script@v4
+              env:
+                  BRANCH: ${{ matrix.branch }}
+                  TEST_SUITE: ${{ matrix.test-suite }}
+              script: |
+                  const { BRANCH: branch, TEST_SUITE: testSuite } = process.env;
+                  const { runTestSuite } = require( './bin/plugin/commands/performance.js' );
+                  const results = await runTestSuite( testSuite, './' );
+                  console.log( results );
 
             # TODO: Evaluate test results
 

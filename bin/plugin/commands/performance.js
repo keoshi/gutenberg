@@ -314,4 +314,5 @@ async function runPerformanceTests( branches, options ) {
 
 module.exports = {
 	runPerformanceTests,
+	runTestSuite,
 };
