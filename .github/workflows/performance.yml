@@ -88,6 +88,10 @@ jobs:
                   ref: ${{ matrix.branch }}
                   path: environment
 
+            - name: Build ${{ matrix.branch }} branch
+              working-directory: environment
+              run: rm -rf node_modules packages/*/node_modules && npm install && npm run build
+
             - name: Run ${{ matrix.test-suite }} test suite
               working-directory: performance-tests
               run: |
