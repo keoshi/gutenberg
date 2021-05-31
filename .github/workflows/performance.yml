@@ -100,12 +100,19 @@ jobs:
               with:
                   script: |
                       const { BRANCH: branch, TEST_SUITE: testSuite } = process.env;
+                      const fs = require('fs');
                       const { runTestSuite } = require( './performance-tests/bin/plugin/commands/performance.js' );
                       const results = await runTestSuite( testSuite, './performance-tests' );
-                      console.log( results );
+                      fs.writeFileSync( `./${ testSuite }-${ branch }-results.json`, JSON.stringify( results ) );
 
-            # TODO: Evaluate test results
+            - name: Upload test results artifact
+              uses: actions/upload-artifact@e448a9b857ee2131e752b06002bf0e093c65e571 # v2.2.2
+              with:
+                  name: ${{ matrix.test-suite }} ${{ matrix.branch }} results
+                  path: ./${{ matrix.test-suite }}-${{ matrix.branch }}-results.json
 
             - name: Stop the WordPress environment
               working-directory: environment
               run: npm run wp-env stop
+
+            # TODO: Evaluate test results
