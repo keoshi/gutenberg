@@ -17,7 +17,7 @@ jobs:
         name: Determine which branches to compare performance for
         runs-on: ubuntu-latest
         outputs:
-            matrix: ${{ steps.get-release-branches.outputs.matrix || steps.get-pull-request-branches.outputs.matrix }}
+            branches: ${{ steps.get-release-branches.outputs.branches || steps.get-pull-request-branches.outputs.branches }}
         steps:
             - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
 
@@ -34,12 +34,12 @@ jobs:
                   WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
                   IFS=. read -ra WP_VERSION_ARRAY <<< "$WP_VERSION"
                   WP_BRANCH="wp/${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}"
-                  echo "::set-output name=matrix::[\"$WP_BRANCH\",\"$PREVIOUS_RELEASE_BRANCH\",\"$CURRENT_RELEASE_BRANCH\"]"
+                  echo "::set-output name=branches::[\"$WP_BRANCH\",\"$PREVIOUS_RELEASE_BRANCH\",\"$CURRENT_RELEASE_BRANCH\"]"
 
             - name: Set branches to current PR's and trunk
               id: get-pull-request-branches
               if: github.event_name == 'pull_request'
-              run: echo "::set-output name=matrix::[\"$GITHUB_SHA\",\"trunk\"]"
+              run: echo "::set-output name=branches::[\"$GITHUB_SHA\",\"trunk\"]"
 
     performance-tests:
         name: Run performance tests
@@ -47,10 +47,10 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                branch: ${{ fromJson( needs.determine-branches.outputs.matrix ) }}
+                branch: ${{ fromJson( needs.determine-branches.outputs.branches ) }}
                 test-suite: [post-editor, site-editor]
         env:
-            tests-branch: ${{ fromJson( needs.determine-branches.outputs.matrix )[ 0 ] }} # First matrix entry also serves as tests branch
+            tests-branch: ${{ fromJson( needs.determine-branches.outputs.branches )[ 0 ] }} # First matrix entry also serves as tests branch
         steps:
             - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
               with:
@@ -130,7 +130,7 @@ jobs:
             - name: Aggregate test results
               uses: actions/github-script@v4
               env:
-                  BRANCHES: ${{ fromJson( needs.determine-branches.outputs.matrix ) }}
+                  BRANCHES: ${{ fromJson( needs.determine-branches.outputs.branches ) }}
                   TEST_SUITES: [post-editor, site-editor]
               with:
                   script: |
