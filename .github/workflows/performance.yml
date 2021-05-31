@@ -18,7 +18,7 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             branches: ${{ steps.get-release-branches.outputs.branches || steps.get-pull-request-branches.outputs.branches }}
-            test-suites: [post-editor, site-editor]
+            test-suites: '[ "post-editor", "site-editor" ]'
         steps:
             - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
 
@@ -49,7 +49,7 @@ jobs:
         strategy:
             matrix:
                 branch: ${{ fromJson( needs.determine-branches.outputs.branches ) }}
-                test-suite: ${{ needs.determine-branches.outputs.test-suites }}
+                test-suite: ${{ fromJson( needs.determine-branches.outputs.test-suites ) }}
         env:
             tests-branch: ${{ fromJson( needs.determine-branches.outputs.branches )[ 0 ] }} # First matrix entry also serves as tests branch
         steps:
@@ -132,7 +132,7 @@ jobs:
               uses: actions/github-script@v4
               env:
                   BRANCHES: ${{ fromJson( needs.determine-branches.outputs.branches ) }}
-                  TEST_SUITES: ${{ needs.determine-branches.outputs.test-suites }}
+                  TEST_SUITES: ${{ fromJson( needs.determine-branches.outputs.test-suites ) }}
               with:
                   script: |
                       const { BRANCHES: branches, TEST_SUITES: testSuites } = process.env;
