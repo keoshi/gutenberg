@@ -115,4 +115,40 @@ jobs:
               working-directory: environment
               run: npm run wp-env stop
 
-            # TODO: Evaluate test results
+    evaluate-test-results:
+        name: Evaluate performance test results
+        needs: [determine-branches, performance-tests]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Download results artifacts
+              uses: actions/download-artifact@4a7a711286f30c025902c28b541c10e147a9b843 # v2.0.8
+
+            - name: Display structure of downloaded files
+              run: ls -R
+
+            - name: Aggregate test results
+              uses: actions/github-script@v4
+              env:
+                  BRANCHES: ${{ fromJson( needs.determine-branches.outputs.matrix ) }}
+                  TEST_SUITES: [post-editor, site-editor]
+              with:
+                  script: |
+                      const { BRANCHES: branches, TEST_SUITES: testSuites } = process.env;
+                      const fs = require('fs');
+                      let results = {};
+                      for ( testSuite of testSuites ) {
+                        results[ testSuite ] = {};
+                        for ( branch of branches ) {
+                          const artifactName = `${ testSuite }-${ branch }-results`;
+                          let result = require( `./${ artifactName }/${ artifactName }.json` );
+                          for ( test of Object.keys( result ) ) {
+                            if ( ! results[ test ] ) {
+                              results[ test ] = {};
+                            }
+                            results[ testSuite ][ test ][ branch ] = result[ test ];
+                          }
+                        }
+                        console.log( `\n>> ${ testSuite }\n` );
+                        console.table( results[ testSuite ] );
+                      }
