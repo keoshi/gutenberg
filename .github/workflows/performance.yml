@@ -93,16 +93,16 @@ jobs:
               run: rm -rf node_modules packages/*/node_modules && npm install && npm run build
 
             - name: Run ${{ matrix.test-suite }} test suite
-              working-directory: performance-tests
               uses: actions/github-script@v4
               env:
                   BRANCH: ${{ matrix.branch }}
                   TEST_SUITE: ${{ matrix.test-suite }}
-              script: |
-                  const { BRANCH: branch, TEST_SUITE: testSuite } = process.env;
-                  const { runTestSuite } = require( './bin/plugin/commands/performance.js' );
-                  const results = await runTestSuite( testSuite, './' );
-                  console.log( results );
+              with:
+                  script: |
+                      const { BRANCH: branch, TEST_SUITE: testSuite } = process.env;
+                      const { runTestSuite } = require( './performance-tests/bin/plugin/commands/performance.js' );
+                      const results = await runTestSuite( testSuite, './performance-tests' );
+                      console.log( results );
 
             # TODO: Evaluate test results
 
